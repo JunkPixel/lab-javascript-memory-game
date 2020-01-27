@@ -27,8 +27,19 @@ const cards = [
 
 const memoryGame = new MemoryGame(cards);
 
-window.addEventListener('load', event => {
-  // Add all the div to the HTML
+function print() {
+  document.getElementById('pairs_clicked').innerText = memoryGame.pairsClicked;
+  document.getElementById('pairs_guessed').innerText = memoryGame.pairsGuessed;
+}
+
+function playAgain() {
+  memoryGame.pairsClicked = 0;
+  memoryGame.pairsGuessed = 0;
+  memoryGame.shuffleCards();
+  document.querySelector('#memory_board').innerHTML = '';
+}
+
+function play() {
   for (let pic of memoryGame.cards) {
     document.querySelector('#memory_board').innerHTML += `
       <div class="card" data-card-name="${pic.name}">
@@ -37,12 +48,36 @@ window.addEventListener('load', event => {
       </div>
     `;
   }
-
-  // Bind the click event of each element to a function
   document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', () => {
-      // TODO: write some code here
+      card.classList.add('turned');
+      memoryGame.pickedCards.push(card);
+      if (memoryGame.pickedCards.length === 2) {
+        if (
+          memoryGame.checkIfPair(
+            memoryGame.pickedCards[0].getAttribute('data-card-name'),
+            memoryGame.pickedCards[1].getAttribute('data-card-name')
+          )
+        ) {
+          memoryGame.pickedCards.pop();
+          memoryGame.pickedCards.pop();
+        } else {
+          setTimeout(() => {
+            memoryGame.pickedCards[0].classList.remove('turned');
+            memoryGame.pickedCards[1].classList.remove('turned');
+            memoryGame.pickedCards.pop();
+            memoryGame.pickedCards.pop();
+          }, 500);
+        }
+        print();
+      }
+      // should do a finished with message and so you can reset
       console.log('Card clicked: ', card);
     });
   });
+}
+
+window.addEventListener('load', event => {
+  playAgain();
+  play();
 });
